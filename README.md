@@ -1,6 +1,6 @@
 # Docker ELK stack
 
-*Forked from https://github.com/deviantony/docker-elk*
+*Forked from https://github.com/deviantony/docker-elk* **with** Elastalert container added
 
 Run the latest version of the ELK (Elasticsearch, Logstash, Kibana) stack + Elastalert with Docker and Docker Compose.
 
