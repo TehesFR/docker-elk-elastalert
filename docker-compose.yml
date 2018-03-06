@@ -1,0 +1,64 @@
+version: '2'
+
+services:
+  elasticsearch:
+    build:
+      context: elasticsearch/
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      #- /data/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    restart: always
+
+  logstash:
+    build:
+      context: logstash/
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  kibana:
+    build:
+      context: kibana/
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  elastalert:
+    build:
+      context: elastalert/
+    depends_on:
+      - elasticsearch
+      - kibana
+    volumes:
+      - /data/elastalert/rules:/opt/elastalert/rules
+      # http://elastalert.readthedocs.io/en/latest/running_elastalert.html#creating-a-rule
+      - /data/elastalert/config/elastalert.yaml:/opt/elastalert/config.yaml
+    networks:
+      - elk
+    restart: always
+
+networks:
+  elk:
+    driver: bridge
